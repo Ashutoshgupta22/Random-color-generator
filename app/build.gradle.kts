@@ -2,7 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.devtools.ksp")
-
+    id("com.google.gms.google-services")
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -52,6 +53,11 @@ android {
 }
 
 dependencies {
+    //firebase bom
+    implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
+
+    //firestore
+    implementation("com.google.firebase:firebase-firestore")
 
     //navigation
     implementation(libs.androidx.navigation.compose)

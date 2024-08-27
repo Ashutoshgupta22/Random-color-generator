@@ -23,30 +23,22 @@ class HomeViewModel(private val repository: ColorRepository) : ViewModel() {
 
     init {
         getAllColors()
-//        viewModelScope.launch {
-//            combine(
-//                repository.allColors,
-//                repository.unsyncedCount
-//            ) { colors, unsyncedCount ->
-//                ColorListData(colors, unsyncedCount)
-//            }.collect { data ->
-//                _uiState.value = UiState.Success(data)
-//            }
-//        }
-//        fetchColors()
+        getUnsyncedCount()
     }
 
-    fun getAllColors() {
-
+    private fun getUnsyncedCount() {
         viewModelScope.launch {
-//            _uiState.value = UiState.Loading
+            repository.unsyncedCount.collect { count ->
+                _unSyncedCount.value = count
+            }
+        }
+    }
 
-            _unSyncedCount.value = repository.unsyncedCount.first()
+    private fun getAllColors() {
+        viewModelScope.launch {
             repository.getAllColors().collect { colors ->
                 _uiState.value = UiState.Success(ColorListData(colors, _unSyncedCount.value))
             }
-
-//            _uiState.value = UiState.Success(ColorListData(emptyList(), _unSyncedCount.value))
         }
     }
 
@@ -64,7 +56,6 @@ class HomeViewModel(private val repository: ColorRepository) : ViewModel() {
 
     fun syncColors() {
         viewModelScope.launch {
-            _uiState.value = UiState.Loading
             try {
                 repository.syncColors()
             } catch (e: Exception) {

@@ -1,8 +1,12 @@
 package com.aspark.janitriassign.ui.screen
 
 import android.graphics.Color.parseColor
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -16,6 +20,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,6 +52,8 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeViewModel) {
         is UiState.Loading -> {
             LoadingScreen()
         }
+
+        is UiState.Message -> TODO()
     }
 }
 
@@ -54,7 +61,10 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeViewModel) {
 fun HomeContent(data: ColorListData, modifier: Modifier) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        modifier = modifier
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(data.colors) { color ->
             ColorItem(color = color)
@@ -65,6 +75,8 @@ fun HomeContent(data: ColorListData, modifier: Modifier) {
 @Composable
 fun ColorItem(color: ColorModel) {
     Card(
+        modifier = Modifier
+            .height(120.dp),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(parseColor(color.color))
@@ -85,9 +97,15 @@ fun ColorItem(color: ColorModel) {
                 modifier = Modifier
                     .width(90.dp)
             )
-            
-            Text(text = "Created at", color = Color.White)
-            Text(text = color.createdAt, color = Color.White)
+            Spacer(modifier = Modifier.weight(1f))
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.End)
+            ) {
+                Text(text = "Created at", color = Color.White)
+                Text(text = color.createdAt, color = Color.White)
+            }
         }
     }
 }

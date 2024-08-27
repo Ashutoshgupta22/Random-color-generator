@@ -13,7 +13,7 @@ import com.google.gson.reflect.TypeToken
 
 @Entity("color")
 data class ColorEntity(
-   @PrimaryKey(autoGenerate = true) val id: Int,
+   @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val color: String,
     val time: Long,
     @ColumnInfo(name = "is_synced") val isSynced: Boolean = false

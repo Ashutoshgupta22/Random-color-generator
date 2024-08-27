@@ -24,8 +24,8 @@ class ColorRepository(
     }
 
     suspend fun addColor(color: String, time: Long) {
-//        val colorEntry = ColorEntity(color = color, time = time)
-//        colorDao.insertColor(colorEntry)
+        val colorEntry = ColorEntity(color = color, time = time)
+        colorDao.insertColor(colorEntry)
     }
 
     suspend fun syncColors() {

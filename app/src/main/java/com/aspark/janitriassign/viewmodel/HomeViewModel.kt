@@ -10,15 +10,16 @@ import com.aspark.janitriassign.ui.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
-class ColorViewModel(private val repository: ColorRepository) : ViewModel() {
+class HomeViewModel(private val repository: ColorRepository) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<ColorListData>>(UiState.Loading)
     val uiState: StateFlow<UiState<ColorListData>> = _uiState.asStateFlow()
+
+    private val _unSyncedCount = MutableStateFlow(0)
+    val unSyncedCount: StateFlow<Int> = _unSyncedCount.asStateFlow()
 
     init {
         getAllColors()
@@ -40,8 +41,12 @@ class ColorViewModel(private val repository: ColorRepository) : ViewModel() {
         viewModelScope.launch {
 //            _uiState.value = UiState.Loading
 
-            _uiState.value = UiState.Success(ColorListData(emptyList(),
-                repository.unsyncedCount.first()))
+            _unSyncedCount.value = repository.unsyncedCount.first()
+            repository.getAllColors().collect { colors ->
+                _uiState.value = UiState.Success(ColorListData(colors, _unSyncedCount.value))
+            }
+
+//            _uiState.value = UiState.Success(ColorListData(emptyList(), _unSyncedCount.value))
         }
     }
 
@@ -84,8 +89,8 @@ class ViewModelFactory(
     private val repository: ColorRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ColorViewModel::class.java)) {
-            return ColorViewModel(repository) as T
+        if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
+            return HomeViewModel(repository) as T
         }
         else throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
     }

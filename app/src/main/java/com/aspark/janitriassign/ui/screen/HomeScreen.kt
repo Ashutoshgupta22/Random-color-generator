@@ -3,7 +3,6 @@ package com.aspark.janitriassign.ui.screen
 import android.graphics.Color.parseColor
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -21,28 +20,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.aspark.janitriassign.firebase.FirestoreDataSource
 import com.aspark.janitriassign.model.ColorListData
-import com.aspark.janitriassign.repository.ColorRepository
-import com.aspark.janitriassign.room.ColorDatabase
-import com.aspark.janitriassign.room.ColorEntity
 import com.aspark.janitriassign.ui.UiState
 import com.aspark.janitriassign.ui.theme.JanitriAssignTheme
-import com.aspark.janitriassign.viewmodel.ColorViewModel
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aspark.janitriassign.model.ColorModel
+import com.aspark.janitriassign.viewmodel.HomeViewModel
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
-
-    val context = LocalContext.current
-    val colorRepository = ColorRepository(
-        colorDao = ColorDatabase.getDatabase(context).colorDao(),
-        remoteDataSource = FirestoreDataSource()
-    )
-    val viewModel = ColorViewModel(colorRepository)
+fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeViewModel) {
 
     val uiState = viewModel.uiState.collectAsState()
 
@@ -118,6 +106,6 @@ fun ErrorScreen() {
 @Composable
 private fun HomeScreenPreview() {
     JanitriAssignTheme {
-        HomeScreen()
+        HomeScreen(viewModel = viewModel())
     }
 }

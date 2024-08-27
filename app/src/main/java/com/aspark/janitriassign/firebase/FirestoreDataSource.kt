@@ -1,6 +1,8 @@
 package com.aspark.janitriassign.firebase
 
+import com.aspark.janitriassign.model.ColorModel
 import com.aspark.janitriassign.room.ColorEntity
+import com.aspark.janitriassign.room.toModel
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -12,21 +14,23 @@ class FirestoreDataSource {
         colors.forEach { colorEntry ->
             colorsCollection.add(mapOf(
                 "color" to colorEntry.color,
-                "time" to colorEntry.time
+                "time" to colorEntry.time,
+                "id" to colorEntry.id,
             )).await()
         }
     }
-//
-//     suspend fun fetchColors(): List<ColorEntity> {
-//        val snapshot = colorsCollection.get().await()
-//        return snapshot.documents.mapNotNull { document ->
-//            val color = document.getString("color")
-//            val time = document.getLong("time")
-//            if (color != null && time != null) {
-//                ColorEntity(color = color, time = time, isSynced = true)
-//            } else {
-//                null
-//            }
-//        }
-//    }
+
+     suspend fun fetchColors(): List<ColorModel> {
+        val snapshot = colorsCollection.get().await()
+        return snapshot.documents.mapNotNull { document ->
+            val color = document.getString("color")
+            val time = document.getLong("time")
+            val id = document.getLong("id")
+            if (color != null && time != null && id != null) {
+                ColorEntity(id = id.toInt(), color = color, time = time).toModel()
+            } else {
+                null
+            }
+        }
+    }
 }

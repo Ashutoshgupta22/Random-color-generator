@@ -1,17 +1,18 @@
 package com.aspark.janitriassign.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.aspark.janitriassign.generateRandomColor
 import com.aspark.janitriassign.model.ColorListData
 import com.aspark.janitriassign.repository.ColorRepository
+import com.aspark.janitriassign.room.toModel
 import com.aspark.janitriassign.ui.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val repository: ColorRepository) : ViewModel() {
@@ -22,7 +23,7 @@ class HomeViewModel(private val repository: ColorRepository) : ViewModel() {
     val unSyncedCount: StateFlow<Int> = _unSyncedCount.asStateFlow()
 
     init {
-        getAllColors()
+//        getAllColors()
         getUnsyncedCount()
     }
 
@@ -34,10 +35,10 @@ class HomeViewModel(private val repository: ColorRepository) : ViewModel() {
         }
     }
 
-    private fun getAllColors() {
+     fun getAllDBColors() {
         viewModelScope.launch {
             repository.getAllColors().collect { colors ->
-                _uiState.value = UiState.Success(ColorListData(colors, _unSyncedCount.value))
+                _uiState.value = UiState.Success(ColorListData(colors))
             }
         }
     }
@@ -58,22 +59,44 @@ class HomeViewModel(private val repository: ColorRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 repository.syncColors()
+                fetchColors()
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error occurred")
             }
         }
     }
 
-//    private fun fetchColors() {
-//        viewModelScope.launch {
+    fun fetchColors() {
+        viewModelScope.launch {
 //            _uiState.value = UiState.Loading
-//            try {
-//                repository.fetchRemoteColors()
-//            } catch (e: Exception) {
-//                _uiState.value = UiState.Error(e.message ?: "Unknown error occurred")
-//            }
-//        }
-//    }
+
+
+            repository.fetchRemoteColors().collect { result ->
+
+                 when (result) {
+                     is UiState.Success -> {
+                         val currentColors = (_uiState.value as? UiState.Success<ColorListData>)?.data?.colors ?: emptyList()
+                         Log.i("HomeViewModel", "currentColors: $currentColors")
+
+                         val mergedColors = currentColors + result.data.filter {
+                             !currentColors.any { current -> current.id == it.id }
+                         }
+                         _uiState.value = UiState.Success(ColorListData(mergedColors.sortedByDescending { it.id }))
+//                         _uiState.value = UiState.Success(ColorListData(currentColors))
+                     }
+
+                     is UiState.Error -> {
+                         _uiState.value = UiState.Error(result.message)
+                     }
+
+                     UiState.Loading -> {}
+                     is UiState.Message -> {
+                         _uiState.value = UiState.Message(result.message)
+                     }
+                 }
+             }
+        }
+    }
 }
 
 class ViewModelFactory(

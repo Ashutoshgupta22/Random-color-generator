@@ -10,5 +10,4 @@ data class ColorModel(
 
 data class ColorListData(
     val colors: List<ColorModel>,
-    val unSyncedCount: Int
 )

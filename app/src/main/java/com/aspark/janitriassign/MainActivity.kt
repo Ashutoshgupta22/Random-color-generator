@@ -130,7 +130,6 @@ class MainActivity : ComponentActivity() {
                     tint = DarkPurple,
                     modifier = Modifier
                         .size(25.dp)
-                        .clickable { }
                 )
             }
         }
